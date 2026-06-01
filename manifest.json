@@ -2,7 +2,7 @@
   "name": "LubeLogger Quick Log",
   "short_name": "LubeLog",
   "description": "Quick fuel and service logging for LubeLogger",
-  "start_url": "./",
+  "start_url": "/app/",
   "display": "standalone",
   "background_color": "#0f0f1a",
   "theme_color": "#16213e",

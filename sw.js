@@ -15,7 +15,7 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-  if (url.pathname.includes('/api/')) {
+  if (url.pathname.startsWith('/api/')) {
     return;
   }
   event.respondWith(
