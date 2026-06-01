@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#16213e">
+  <title>LubeLog</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== SETUP VIEW ===== -->
+  <div id="view-setup" class="view">
+    <div class="setup-container">
+      <div class="setup-logo">
+        <img src="icons/icon-192.png" alt="LubeLogger" width="72" height="72">
+        <h1>LubeLog</h1>
+        <p class="subtitle">Quick logging for LubeLogger</p>
+      </div>
+
+      <!-- Step 1: Connection -->
+      <div id="setup-step-connection" class="setup-step">
+        <h2>Connect to your server</h2>
+        <div class="form-group">
+          <label for="setup-url">LubeLogger URL</label>
+          <input type="url" id="setup-url" placeholder="https://lubelogger.example.com" autocomplete="url" inputmode="url">
+          <small>The base URL of your LubeLogger instance</small>
+        </div>
+        <div class="form-group">
+          <label for="setup-apikey">API Key</label>
+          <input type="password" id="setup-apikey" placeholder="Your API key">
+          <small>Generate one in LubeLogger under Settings &rarr; API Keys (Editor scope)</small>
+        </div>
+        <button id="setup-connect-btn" class="btn btn-primary btn-block" onclick="App.testConnection()">
+          Test Connection
+        </button>
+        <div id="setup-connection-status" class="status-msg"></div>
+      </div>
+
+      <!-- Step 2: Default Vehicle -->
+      <div id="setup-step-vehicle" class="setup-step hidden">
+        <h2>Choose a default vehicle</h2>
+        <p class="subtitle">This will be pre-selected for quick logging. You can always switch.</p>
+        <div id="setup-vehicle-list" class="vehicle-grid"></div>
+        <button class="btn btn-outline btn-block" onclick="App.setDefaultVehicle(null)">
+          Always ask me
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN APP ===== -->
+  <div id="view-app" class="view hidden">
+
+    <!-- Top bar -->
+    <header class="app-header">
+      <div class="header-left">
+        <img src="icons/icon-128.png" alt="LubeLogger" width="28" height="28">
+      </div>
+      <div id="header-vehicle" class="header-vehicle" onclick="App.showVehicleSwitcher()">
+        <span id="header-vehicle-name">Select Vehicle</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M2 4l4 4 4-4"/></svg>
+      </div>
+      <div class="header-right">
+        <button class="icon-btn" onclick="App.navigate('settings')" aria-label="Settings">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Tab content area -->
+    <main class="app-content">
+
+      <!-- FUEL TAB -->
+      <div id="tab-fuel" class="tab-panel">
+        <form id="fuel-form" onsubmit="App.submitFuel(event)">
+          <h2>Log Fuel</h2>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="fuel-date">Date</label>
+              <input type="date" id="fuel-date" required>
+            </div>
+            <div class="form-group flex-1">
+              <label for="fuel-odometer">Odometer</label>
+              <input type="number" id="fuel-odometer" placeholder="Miles" inputmode="decimal" step="any" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="fuel-gallons">Fuel Amount</label>
+              <input type="number" id="fuel-gallons" placeholder="Gallons" inputmode="decimal" step="any" required>
+            </div>
+            <div class="form-group flex-1">
+              <label for="fuel-cost">Total Cost</label>
+              <input type="number" id="fuel-cost" placeholder="$0.00" inputmode="decimal" step="any" required>
+            </div>
+          </div>
+          <div class="form-row toggles">
+            <label class="toggle-label">
+              <input type="checkbox" id="fuel-filltofull" checked>
+              <span>Filled to full</span>
+            </label>
+            <label class="toggle-label">
+              <input type="checkbox" id="fuel-missed">
+              <span>Missed fill-up</span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label for="fuel-notes">Notes <span class="optional">(optional)</span></label>
+            <input type="text" id="fuel-notes" placeholder="Station name, etc.">
+          </div>
+          <div class="form-group">
+            <label for="fuel-tags">Tags <span class="optional">(optional)</span></label>
+            <input type="text" id="fuel-tags" placeholder="Space-separated tags">
+          </div>
+          <button type="submit" id="fuel-submit-btn" class="btn btn-primary btn-block">
+            Save Fuel Record
+          </button>
+        </form>
+      </div>
+
+      <!-- SERVICE TAB -->
+      <div id="tab-service" class="tab-panel hidden">
+        <form id="service-form" onsubmit="App.submitService(event)">
+          <h2>Log Service</h2>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="service-date">Date</label>
+              <input type="date" id="service-date" required>
+            </div>
+            <div class="form-group flex-1">
+              <label for="service-odometer">Odometer</label>
+              <input type="number" id="service-odometer" placeholder="Miles" inputmode="decimal" step="any" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="service-desc">Description</label>
+            <input type="text" id="service-desc" placeholder="Oil change, tire rotation..." required>
+          </div>
+          <div class="form-group">
+            <label for="service-cost">Cost</label>
+            <input type="number" id="service-cost" placeholder="$0.00" inputmode="decimal" step="any" required>
+          </div>
+          <div class="form-group">
+            <label for="service-notes">Notes <span class="optional">(optional)</span></label>
+            <input type="text" id="service-notes" placeholder="Shop name, details...">
+          </div>
+          <div class="form-group">
+            <label for="service-tags">Tags <span class="optional">(optional)</span></label>
+            <input type="text" id="service-tags" placeholder="Space-separated tags">
+          </div>
+          <button type="submit" id="service-submit-btn" class="btn btn-primary btn-block">
+            Save Service Record
+          </button>
+        </form>
+      </div>
+
+      <!-- HISTORY TAB -->
+      <div id="tab-history" class="tab-panel hidden">
+        <h2>Recent Records</h2>
+        <div class="history-tabs">
+          <button class="history-tab active" onclick="App.loadHistory('fuel')">Fuel</button>
+          <button class="history-tab" onclick="App.loadHistory('service')">Service</button>
+        </div>
+        <div id="history-list" class="history-list">
+          <p class="empty-state">Select a vehicle to view history</p>
+        </div>
+      </div>
+
+      <!-- SETTINGS TAB -->
+      <div id="tab-settings" class="tab-panel hidden">
+        <h2>Settings</h2>
+        <div class="settings-section">
+          <h3>Connection</h3>
+          <div class="form-group">
+            <label for="settings-url">Server URL</label>
+            <input type="url" id="settings-url" placeholder="https://lubelogger.example.com">
+          </div>
+          <div class="form-group">
+            <label for="settings-apikey">API Key</label>
+            <input type="password" id="settings-apikey" placeholder="Your API key">
+          </div>
+          <button class="btn btn-primary btn-block" onclick="App.saveSettings()">Save Connection</button>
+        </div>
+        <div class="settings-section">
+          <h3>Default Vehicle</h3>
+          <div id="settings-vehicle-list" class="vehicle-grid compact"></div>
+          <button class="btn btn-outline btn-block" onclick="App.updateDefaultVehicle(null)">No default (always ask)</button>
+        </div>
+        <div class="settings-section">
+          <h3>About</h3>
+          <p class="text-muted" id="settings-server-info">Not connected</p>
+          <button class="btn btn-danger btn-block" onclick="App.resetApp()">Reset App</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom nav -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-tab="fuel" onclick="App.navigate('fuel')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22V6l9-4 9 4v16"/><path d="M12 2v20"/><path d="M17 8l4 2v6"/><circle cx="21" cy="16" r="1"/></svg>
+        <span>Fuel</span>
+      </button>
+      <button class="nav-btn" data-tab="service" onclick="App.navigate('service')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <span>Service</span>
+      </button>
+      <button class="nav-btn" data-tab="history" onclick="App.navigate('history')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>History</span>
+      </button>
+    </nav>
+
+    <!-- Vehicle switcher overlay -->
+    <div id="vehicle-switcher" class="overlay hidden" onclick="App.hideVehicleSwitcher(event)">
+      <div class="overlay-sheet" onclick="event.stopPropagation()">
+        <div class="overlay-header">
+          <h3>Switch Vehicle</h3>
+          <button class="icon-btn" onclick="App.hideVehicleSwitcher()">&times;</button>
+        </div>
+        <div id="switcher-vehicle-list" class="vehicle-grid compact"></div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
