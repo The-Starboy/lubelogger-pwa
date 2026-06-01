@@ -1,0 +1,7 @@
+.git
+.github
+.gitignore
+.dockerignore
+Dockerfile
+nginx.conf
+README.md
