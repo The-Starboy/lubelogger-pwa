@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lubelog-pwa-v1';
+const CACHE_NAME = 'lubelog-pwa-v2';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
