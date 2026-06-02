@@ -4,8 +4,8 @@
   "description": "Quick fuel and service logging for LubeLogger",
   "start_url": "/app/",
   "display": "standalone",
-  "background_color": "#0f0f1a",
-  "theme_color": "#16213e",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
   "orientation": "portrait",
   "icons": [
     {
